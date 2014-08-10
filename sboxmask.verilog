@@ -2,6 +2,8 @@
 /*   based on compact S-box using Canright algorithm */
 /*   optimized using NOR gates and NAND gates */
 
+/* verilator lint_off UNOPTFLAT */
+
 /* multiply in GF(2^2), shared factors, using normal basis [Omega^2,Omega] */
 module GF_MULS_2 ( A, B, Q );
     input  [2:0] A;   /* shared factors include bit sum: sum hi lo */
@@ -47,7 +49,7 @@ module GF_INV_4 ( A, M, N, O, Q );
     input  [3:0] O;   /* outer mask-switch terms, to save 2 XORs */
     output [3:0] Q;
     wire   [1:0] a, b, m, n, c, e, d, p, q, an, mb, mn, dn, em, pm, qm;
-    wire   [1:0] csa, csb, em, qsa, qsb, dm, psa, psb; /* partial sums */
+    wire   [1:0] csa, csb, qsa, qsb, dm, psa, psb; /* partial sums */
     wire   [2:0] af, bf, mf, nf, ef, df;  /* factors w/ bit sums */
     
     assign a = A[3:2];
