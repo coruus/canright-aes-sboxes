@@ -152,7 +152,7 @@ int iSbox(int n) {
 }
 
 /* compute tables of Sbox & its inverse; print 'em out */
-int main() {
+int main(void) {
   int Sbox_tbl[256], iSbox_tbl[256], i, j;
 
   for (i = 0; i < 256; i++) {
