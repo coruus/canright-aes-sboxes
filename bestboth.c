@@ -35,20 +35,22 @@ F1261450CA86D330C502A8BF412B3590352582D03974323C65C4836C69953380    0
  * uses pruning algorithm to eliminate redundant cases; minimal memory copying
  */
 
+#include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #define N 8
 
 /* gatematrix is a structure with an array of 16-bit columns,
  list of indices (used in pairs), number of columns, and number of gates*/
 typedef struct gatematrix {
-  unsigned int mat[128];
+  uint32_t mat[128];
   char ind[256];
   int n;
   int g;
 } GateMat;
 
-static unsigned int share[65536];
+static uint32_t share[65536];
 static GateMat test;
 
 /* blockPrint prints columns and index pairs for matrix pair */
@@ -56,15 +58,21 @@ void blockPrint(GateMat* p, const char* tag1, const char* tag2) {
   int i;
 
   printf("%6s: ", tag1);
-  for (i = 0; i < p->n; i++) printf("%02X", (p->mat[i]) & 0XFF);
-  if ((p->n) > N)
+  for (i = 0; i < p->n; i++) {
+    printf("%02X", (p->mat[i]) & 0XFF);
+  }
+  if ((p->n) > N) {
     printf("\n");
+  }
   printf("%6s: ", tag2);
-  for (i = 0; i < p->n; i++) printf("%02X", ((p->mat[i]) & 0XFF00) >> 8);
+  for (i = 0; i < p->n; i++) {
+    printf("%02X", ((p->mat[i]) & 0XFF00) >> 8);
+  }
   if ((p->n) > N)
     printf("\n");
-  for (i = 0; i < (p->n) - N; i++)
+  for (i = 0; i < (p->n) - N; i++) {
     printf(" [%1d,%1d], ", p->ind[2 * i], p->ind[2 * i + 1]);
+  }
   printf("\n ncols = %2d, gates = %2d\n", p->n, p->g);
 
 } /* end blockPrint */
@@ -75,7 +83,7 @@ void copyMat(GateMat* p, GateMat* q) {
 
   n = q->n = p->n;
   q->g = p->g;
-  memcpy(q->mat, p->mat, n * sizeof(unsigned int));
+  memcpy(q->mat, p->mat, n * sizeof(uint32_t));
   memcpy(q->ind, p->ind, (n - N) * 2);
 } /* end copyMat */
 
@@ -108,9 +116,12 @@ void bestgates() {
   for (i = 0; i < nm; i++) /* for each pair of columns */
     for (j = i + 1; j < n; j++) {
       c = (test.mat[i]) & (test.mat[j]);
-      if (t = share[c]) {                           /* if can share a gate */
-        if (i < io && j != io && j != jo && j < nm) /* if prior, indep. pair */
-          continue; /* then been there, done that; skip to next j */
+      t = share[c];
+      if (t) { /* if can share a gate ????????????? */
+        if (i < io && j != io && j != jo && j < nm) {
+          // if prior, indep. pair, then been there, done that; skip to next j
+          continue;
+        }
         test.n = np;
         test.g = g - t;
         ci = test.mat[i]; /* save current columns */
@@ -136,7 +147,7 @@ void bestgates() {
     test.g = gb;
   }
   /*      else {printf("%3d [%2d]",n,g); fflush(stdout);} */
-} /* end bestgates */
+}
 
 /* bestmat reconstructs best matrix */
 void bestmat(GateMat* p) {
@@ -154,10 +165,9 @@ void bestmat(GateMat* p) {
     test.mat[j] ^= c;
     test.mat[n + N] = c;
   }
-} /* end bestmat */
+}
 
-/* main */
-int main(int argc, char* argv[]) {
+int main(void) {
   char line[256];
   char name[4][4] = {
       "A2X", "X2S", "S2X", "X2A",
@@ -183,8 +193,8 @@ int main(int argc, char* argv[]) {
       sscanf(line + 2 * i, "%02X", &u);
       InitMat[i] = u;
     }
-    sscanf(line + 65, "%d", &nid);
-    printf("\nbasis #%3d:\n", nid);
+    sscanf(line + 65, "%ld", &nid);
+    printf("\nbasis #%3ld:\n", nid);
 
     /* NOTE: matrix input order is: [A2X, X2A, X2S, S2X] */
     for (i = 0; i < 8; i++) { /* combine input pair; combine output pair */
@@ -195,7 +205,9 @@ int main(int argc, char* argv[]) {
     gt = 0;
     for (k = 0; k < 2; k++) { /* for each matrix pair */
       (orig[k]).n = 8;        /* initialize # columns, # gates */
-      for (i = j = 0; i < 8; i++) j += share[(orig[k]).mat[i]];
+      for (i = j = 0; i < 8; i++) {
+        j += share[(orig[k]).mat[i]];
+      }
       (orig[k]).g = j - 8;
       blockPrint(&(orig[k]), name[k], name[k + 2]);
       fflush(stdout);
@@ -208,9 +220,9 @@ int main(int argc, char* argv[]) {
       fflush(stdout);
       gt += test.g; /* total # gates */
     }
-    printf("***bestgates %3d = %5d   =%5d +%5d\n", nid, gt, (orig[0]).g, (orig[1]).g);
+    printf("***bestgates %3ld = %5ld   =%5d +%5d\n", nid, gt, (orig[0]).g, (orig[1]).g);
     fflush(stdout);
   }
 
-  return (0);
-} /* end main */
+  return 0;
+}
