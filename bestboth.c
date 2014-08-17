@@ -107,9 +107,9 @@ void bestgates() {
   np = n + 1;
   n2 = 2 * (n - N);
   n2p = n2 + 1;
-  if (n == N)
+  if (n == N) {
     io = jo = 0; /* if orig matrix, no "old" index pair */
-  else {
+  } else {
     io = (test.ind[n2 - 2]);
     jo = (test.ind[n2 - 1]);
   }
